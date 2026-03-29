@@ -1,0 +1,9 @@
+<h2>Scan History</h2>
+
+{% for scan in scans %}
+    <div style="border:1px solid black; margin:10px; padding:10px;">
+        <strong>Target:</strong> {{ scan.target }} <br>
+        <strong>Time:</strong> {{ scan.created_at }} <br>
+        <pre>{{ scan.result }}</pre>
+    </div>
+{% endfor %}

@@ -6,7 +6,12 @@ def scan_view(request):
     if request.method == "POST":
         target = request.POST.get("target")
 
-        nm = nmap.PortScanner()
+        nm = nmap.PortScanner(
+    nmap_search_path=(
+        "C:\\Program Files (x86)\\Nmap\\nmap.exe",
+        "C:\\Program Files\\Nmap\\nmap.exe",
+    )
+)
         nm.scan(target, '1-1024')
 
         result = ""
@@ -24,3 +29,7 @@ def scan_view(request):
         return render(request, "result.html", {"result": result})
 
     return render(request, "scan.html")
+
+def history_view(request):
+    scans = ScanResult.objects.all().order_by('-created_at')
+    return render(request, "history.html", {"scans": scans})

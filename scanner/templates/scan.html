@@ -1,5 +1,6 @@
 <form method="post">
     {% csrf_token %}
-    <input type="text" name="target" placeholder="Enter IP or domain">
-    <button type="submit">Scan</button>
+    <input type="text" name="target" placeholder="Enter IP or domain" required>
+    <button><a href="/history/" style="text-decoration: none; color: black;">Scan History</a></button>
+    <button type="submit" cursor="pointer">Scan</button>
 </form>
