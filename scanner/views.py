@@ -41,11 +41,12 @@ def logout_view(request):
 
 
 # 🔍 SCAN (Protected)
-@login_required
 def scan_view(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
     if request.method == "POST":
-        target = request.POST.get("target")
-
+        target = request.POST.get('target')
         nm = nmap.PortScanner(
             nmap_search_path=(
                 "C:\\Program Files (x86)\\Nmap\\nmap.exe",
@@ -77,7 +78,8 @@ def scan_view(request):
 
 
 # 📜 HISTORY (User-specific)
-@login_required
 def history_view(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
     scans = ScanResult.objects.filter(user=request.user).order_by('-created_at')
     return render(request, "history.html", {"scans": scans})

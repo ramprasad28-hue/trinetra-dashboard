@@ -25,13 +25,18 @@ SECRET_KEY = 'django-insecure--t)i(jt%pyjwryd&1*#ev*d(tlxvzwmel20v2%m4q!sf_k!5!k
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+LOGIN_URL='/login/'
+LOGIN_REDIRECT_URL='/'
+LOGOUT_REDIRECT_URL='/login/'
+
+
 ALLOWED_HOSTS = []
 
 
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
+    'django.contrib.admin'  ,
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
