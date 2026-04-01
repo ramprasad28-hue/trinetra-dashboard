@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+
+{% block title %}User Profile - TRINETRA{% endblock %}
+
+{% block content %}
+<h2><i class="fas fa-user-circle"></i> User Profile</h2>
+
+<div class="row mt-4">
+    <!-- User Information -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-user"></i> Account Information
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Username:</strong></p>
+                        <p class="text-muted">{{ request.user.username }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Email:</strong></p>
+                        <p class="text-muted">{{ request.user.email }}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Member Since:</strong></p>
+                        <p class="text-muted">{{ request.user.date_joined|date:"Y-m-d" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Last Login:</strong></p>
+                        <p class="text-muted">
+                            {% if request.user.last_login %}
+                                {{ request.user.last_login|date:"Y-m-d H:i" }}
+                            {% else %}
+                                Never
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Card -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <i class="fas fa-chart-bar"></i> Scanning Statistics
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <div class="stat-box">
+                            <h3 class="text-primary">{{ stats.total_scans }}</h3>
+                            <p class="text-muted">Total Scans</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-box">
+                            <h3 class="text-success">{{ stats.total_open_ports }}</h3>
+                            <p class="text-muted">Total Open Ports</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-box">
+                            <h3 class="text-info">
+                                {% if stats.average_scan_time %}
+                                    {{ stats.average_scan_time|floatformat:2 }}s
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </h3>
+                            <p class="text-muted">Avg Scan Time</p>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if stats.last_scan_date %}
+                    <hr>
+                    <p class="text-center text-muted">
+                        <strong>Last Scan:</strong> {{ stats.last_scan_date|date:"Y-m-d H:i" }}
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Scans -->
+        {% if recent_scans %}
+            <div class="card mt-4">
+                <div class="card-header">
+                    <i class="fas fa-recent"></i> Recent Scans
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for scan in recent_scans %}
+                        <a href="{% url 'scan_detail' scan.id %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ scan.target }}</h6>
+                                <small>{{ scan.completed_at|date:"Y-m-d H:i" }}</small>
+                            </div>
+                            <p class="mb-1">
+                                <span class="badge bg-success">{{ scan.open_ports_count }} open</span>
+                                <span class="badge 
+                                    {% if scan.risk_level == 'CRITICAL' %}bg-danger
+                                    {% elif scan.risk_level == 'HIGH' %}bg-warning text-dark
+                                    {% elif scan.risk_level == 'MEDIUM' %}bg-info
+                                    {% else %}bg-success{% endif %}">
+                                    {{ scan.risk_level }}
+                                </span>
+                            </p>
+                        </a>
+                    {% endfor %}
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'history' %}" class="text-decoration-none">View all scans →</a>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-info mt-4">
+                <i class="fas fa-info-circle"></i> No completed scans yet. Start your first scan!
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Quick Actions -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-cogs"></i> Quick Actions
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'scan' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> New Scan
+                    </a>
+                    <a href="{% url 'history' %}" class="btn btn-secondary">
+                        <i class="fas fa-history"></i> View History
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Tips -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <i class="fas fa-lightbulb"></i> Security Tips
+            </div>
+            <div class="card-body">
+                <h6 class="card-subtitle mb-3">Protect Your Network:</h6>
+                <ul class="list-unstyled small">
+                    <li><i class="fas fa-check text-success"></i> Regularly scan your network</li>
+                    <li><i class="fas fa-check text-success"></i> Keep services updated</li>
+                    <li><i class="fas fa-check text-success"></i> Use firewall rules</li>
+                    <li><i class="fas fa-check text-success"></i> Monitor open ports</li>
+                    <li><i class="fas fa-check text-success"></i> Enable authentication</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Account Settings -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <i class="fas fa-lock"></i> Account Settings
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-3">Manage your account settings and preferences</p>
+                <div class="d-grid gap-2">
+                    <a href="#" class="btn btn-outline-secondary btn-sm" disabled>
+                        <i class="fas fa-key"></i> Change Password
+                    </a>
+                    <a href="#" class="btn btn-outline-secondary btn-sm" disabled>
+                        <i class="fas fa-bell"></i> Notifications
+                    </a>
+                </div>
+                <small class="text-muted mt-2 d-block">
+                    <i class="fas fa-info-circle"></i> Coming soon!
+                </small>
+            </div>
+        </div>
+
+        <!-- Scan Tips -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <i class="fas fa-book"></i> Scanning Guide
+            </div>
+            <div class="card-body">
+                <h6 class="card-subtitle mb-3">Key Concepts:</h6>
+                <dl class="small">
+                    <dt><strong>Open Ports</strong></dt>
+                    <dd class="text-muted">Services actively listening on this port</dd>
+                    
+                    <dt class="mt-2"><strong>Closed Ports</strong></dt>
+                    <dd class="text-muted">Ports that are not listening but accessible</dd>
+                    
+                    <dt class="mt-2"><strong>Filtered Ports</strong></dt>
+                    <dd class="text-muted">Ports hidden by firewall/filter</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

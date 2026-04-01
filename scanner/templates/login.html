@@ -1,10 +1,80 @@
-<h2>Login</h2>
+{% extends 'base.html' %}
 
-<form method="post">
-    {% csrf_token %}
-    <input type="text" name="username" placeholder="Username"><br><br>
-    <input type="password" name="password" placeholder="Password"><br><br>
-    <button type="submit">Login</button>
-</form>
+{% block title %}Login - TRINETRA{% endblock %}
 
-<p>Don't have an account? <a href="/signup/">Signup</a></p>
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-sign-in-alt"></i> Login to TRINETRA
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Enter your credentials to access the scanner</p>
+                
+                <form method="POST" action="{% url 'login' %}" novalidate>
+                    {% csrf_token %}
+                    
+                    <!-- Username Field -->
+                    <div class="form-group">
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.username.errors %}
+                                    {{ error }}<br>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Password Field -->
+                    <div class="form-group">
+                        {{ form.password }}
+                        {% if form.password.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.password.errors %}
+                                    {{ error }}<br>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Form Errors -->
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}<br>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </form>
+                
+                <hr>
+                
+                <!-- Links -->
+                <div class="text-center">
+                    <p class="mb-0">Don't have an account? <a href="{% url 'signup' %}" class="text-danger fw-bold">Signup here</a></p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Info Card -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-info-circle text-info"></i> About TRINETRA
+                </h5>
+                <p class="card-text small">
+                    TRINETRA is a powerful network security scanner that helps you identify open ports 
+                    and potential security vulnerabilities in your network infrastructure.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
