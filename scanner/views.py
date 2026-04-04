@@ -114,7 +114,7 @@ def logout_view(request):
     logout(request)
     logger.info(f'User logged out: {username}')
     messages.success(request, 'You have been logged out.')
-    return redirect('login')
+    return redirect('/login/')
 
 
 # ✅ SCAN VIEW (Main scanning functionality)
@@ -359,3 +359,4 @@ def page_not_found_view(request, exception):
 def server_error_view(request):
     """Custom 500 error handler"""
     return render(request, '500.html', status=500)
+
