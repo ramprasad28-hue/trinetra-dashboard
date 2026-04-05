@@ -262,10 +262,15 @@ def history_view(request):
             scans = paginator.page(paginator.num_pages)
         
         logger.info(f'User {request.user.username} viewed scan history (page {page})')
-        
+
+        status_choices = [
+            ("completed", "Completed"),
+            ("scanning", "Scanning"),
+            ("failed", "Failed")
+        ]        
         return render(request, 'history.html', {
             'scans': scans,
-            'status_choices': ScanResult.SCAN_STATUS_CHOICES,
+            'status_choices': status_choices,
             'total_scans': paginator.count
         })
     
