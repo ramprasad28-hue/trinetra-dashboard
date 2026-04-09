@@ -3,154 +3,216 @@
 {% block title %}Network Scanner - TRINETRA{% endblock %}
 
 {% block content %}
-<div class="row">
-    <!-- Scanner Form -->
-    <div class="col-lg-8">
-        <h2><i class="fas fa-shield-alt"></i> Network Scanner</h2>
-        
-        <div class="card mt-4">
-            <div class="card-header">
-                <i class="fas fa-search"></i> Scan Configuration
-            </div>
-            <div class="card-body">
-                <form method="POST" action="{% url 'scan' %}" novalidate>
-                    {% csrf_token %}
-                    
-                    <!-- Target Field -->
-                    <div class="form-group mb-4">
-                        <label for="{{ form.target.id_for_label }}" class="form-label">
-                            <i class="fas fa-bullseye"></i> Target to Scan
-                        </label>
-                        {{ form.target }}
-                        <small class="form-text text-muted d-block mt-2">
-                            Enter IP address (192.168.1.1), domain (example.com), or CIDR range (192.168.1.0/24)
-                        </small>
-                        {% if form.target.errors %}
-                            <div class="invalid-feedback d-block text-danger">
-                                {% for error in form.target.errors %}
-                                    <i class="fas fa-exclamation-circle"></i> {{ error }}<br>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Port Range Field -->
-                    <div class="form-group mb-4">
-                        <label for="{{ form.port_range.id_for_label }}" class="form-label">
-                            <i class="fas fa-network-wired"></i> Port Range
-                        </label>
-                        {{ form.port_range }}
-                        <small class="form-text text-muted d-block mt-2">
-                            Format: 1-1024 (range) or 80,443,3306 (specific ports). Scanning more ports takes longer.
-                        </small>
-                        {% if form.port_range.errors %}
-                            <div class="invalid-feedback d-block text-danger">
-                                {% for error in form.port_range.errors %}
-                                    <i class="fas fa-exclamation-circle"></i> {{ error }}<br>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Scan Type Field -->
-                    <div class="form-group mb-4">
-                        <label class="form-label">
-                            <i class="fas fa-list"></i> Scan Type
-                        </label>
-                        <div class="mt-2">
-                            {% for radio in form.scan_type %}
-                                <div class="form-check">
-                                    {{ radio.tag }}
-                                    <label class="form-check-label">
-                                        {{ radio.choice_label }}
-                                    </label>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    
-                    <!-- Form Non-Field Errors -->
-                    {% if form.non_field_errors %}
-                        <div class="alert alert-danger">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            {% for error in form.non_field_errors %}
-                                {{ error }}<br>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                    
-                    <!-- Submit Button -->
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="fas fa-play"></i> Start Scan
-                        </button>
-                    </div>
-                </form>
-            </div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-slide-in">
+    <!-- Main Scanner Section -->
+    <div class="lg:col-span-2 space-y-6">
+        <!-- Header -->
+        <div>
+            <h1 class="text-4xl font-bold mb-2 flex items-center gap-3">
+                <i class="fas fa-search text-purple-400 text-5xl"></i>
+                Network Scanner
+            </h1>
+            <p class="text-gray-400">Enter target and scan for open ports</p>
         </div>
-        
-        <!-- Quick Links -->
-        <div class="card mt-4">
-            <div class="card-header">
-                <i class="fas fa-lightning-bolt"></i> Quick Actions
-            </div>
-            <div class="card-body">
-                <div class="d-grid gap-2">
-                    <a href="{% url 'history' %}" class="btn btn-outline-secondary">
-                        <i class="fas fa-history"></i> View Scan History
-                    </a>
+
+        <!-- Scanner Form Card -->
+        <div class="glass rounded-2xl p-8 border border-gray-700 card-hover">
+            <form method="POST" class="space-y-6">
+                {% csrf_token %}
+
+                <!-- Target Input -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-3">
+                        <i class="fas fa-bullseye mr-2 text-purple-400"></i>
+                        <span>Target to Scan</span>
+                        <span class="text-red-400">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        name="target" 
+                        placeholder="IP address, domain, or CIDR range (e.g., 192.168.1.0/24)"
+                        required
+                        autofocus
+                        class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition"
+                    >
+                    <p class="text-xs text-gray-500 mt-2">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Valid formats: 192.168.1.1, example.com, 192.168.1.0/24
+                    </p>
                 </div>
+
+                <!-- Port Range Selection -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-3">
+                            <i class="fas fa-network-wired mr-2 text-purple-400"></i>
+                            <span>Port Range</span>
+                            <span class="text-red-400">*</span>
+                        </label>
+                        <select 
+                            name="port_range"
+                            required
+                            class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition cursor-pointer"
+                        >
+                            <option value="">Select port range...</option>
+                            <option value="1-1024">1-1024 (Common)</option>
+                            <option value="1-65535">1-65535 (All)</option>
+                            <option value="80,443">80,443 (Web)</option>
+                            <option value="22,3306,5432">Database/SSH</option>
+                        </select>
+                    </div>
+
+                    <!-- Scan Type -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-3">
+                            <i class="fas fa-list mr-2 text-purple-400"></i>
+                            <span>Scan Type</span>
+                            <span class="text-red-400">*</span>
+                        </label>
+                        <select 
+                            name="scan_type"
+                            required
+                            class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition cursor-pointer"
+                        >
+                            <option value="">Select scan type...</option>
+                            <option value="single">Single Target</option>
+                            <option value="range">IP Range</option>
+                            <option value="multiple">Multiple Targets</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex gap-4 pt-4">
+                    <button 
+                        type="submit"
+                        class="flex-1 py-3 px-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-purple-500/50 transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 group"
+                    >
+                        <i class="fas fa-play group-hover:translate-x-1 transition"></i>
+                        Start Scan
+                    </button>
+                    <button 
+                        type="reset"
+                        class="py-3 px-6 bg-gray-800 border border-gray-700 text-white font-semibold rounded-lg hover:bg-gray-700 transition flex items-center gap-2"
+                    >
+                        <i class="fas fa-redo"></i>Clear
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Info Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="glass rounded-lg p-4 border border-gray-700">
+                <h3 class="font-semibold text-purple-400 mb-2 flex items-center gap-2">
+                    <i class="fas fa-clock"></i>Time Estimate
+                </h3>
+                <p class="text-sm text-gray-300">2-5 minutes for standard scan</p>
+            </div>
+            <div class="glass rounded-lg p-4 border border-gray-700">
+                <h3 class="font-semibold text-purple-400 mb-2 flex items-center gap-2">
+                    <i class="fas fa-shield-alt"></i>Security
+                </h3>
+                <p class="text-sm text-gray-300">Your data stays encrypted & secure</p>
+            </div>
+            <div class="glass rounded-lg p-4 border border-gray-700">
+                <h3 class="font-semibold text-purple-400 mb-2 flex items-center gap-2">
+                    <i class="fas fa-check-circle"></i>Legal
+                </h3>
+                <p class="text-sm text-gray-300">Only scan networks with permission</p>
             </div>
         </div>
     </div>
-    
-    <!-- Information Sidebar -->
-    <div class="col-lg-4">
-        <!-- Tips Card -->
-        <div class="card">
-            <div class="card-header">
-                <i class="fas fa-lightbulb"></i> Scanning Tips
-            </div>
-            <div class="card-body">
-                <h6 class="card-subtitle mb-3">Best Practices:</h6>
-                <ul class="list-unstyled">
-                    <li><i class="fas fa-check text-success"></i> <strong>Always get permission</strong> before scanning networks</li>
-                    <li><i class="fas fa-check text-success"></i> <strong>Start with port range</strong> 1-1024 for faster scans</li>
-                    <li><i class="fas fa-check text-success"></i> <strong>Scan during off-hours</strong> to avoid network load</li>
-                    <li><i class="fas fa-check text-success"></i> <strong>Check regularly</strong> for new open ports</li>
-                </ul>
+
+    <!-- Sidebar -->
+    <div class="space-y-6">
+        <!-- Quick Tips -->
+        <div class="glass rounded-2xl p-6 border border-gray-700 card-hover">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                <i class="fas fa-lightbulb text-yellow-400 text-2xl"></i>
+                Quick Tips
+            </h3>
+            <ul class="space-y-3 text-sm text-gray-300">
+                <li class="flex items-start gap-2">
+                    <span class="text-green-400 mt-1">✓</span>
+                    <span>Always get written permission before scanning</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="text-green-400 mt-1">✓</span>
+                    <span>Start with port range 1-1024</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="text-green-400 mt-1">✓</span>
+                    <span>Scan during off-peak hours</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="text-green-400 mt-1">✓</span>
+                    <span>Keep regular backups of results</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="text-green-400 mt-1">✓</span>
+                    <span>Review logs for suspicious activity</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Common Ports -->
+        <div class="glass rounded-2xl p-6 border border-gray-700 card-hover">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                <i class="fas fa-book text-blue-400 text-2xl"></i>
+                Common Ports
+            </h3>
+            <div class="space-y-2 text-sm text-gray-300">
+                <div class="flex justify-between items-center p-2 bg-gray-800/50 rounded">
+                    <span><strong>21</strong></span>
+                    <span class="text-gray-500">FTP</span>
+                </div>
+                <div class="flex justify-between items-center p-2 bg-gray-800/50 rounded">
+                    <span><strong>22</strong></span>
+                    <span class="text-gray-500">SSH</span>
+                </div>
+                <div class="flex justify-between items-center p-2 bg-gray-800/50 rounded">
+                    <span><strong>80</strong></span>
+                    <span class="text-gray-500">HTTP</span>
+                </div>
+                <div class="flex justify-between items-center p-2 bg-gray-800/50 rounded">
+                    <span><strong>443</strong></span>
+                    <span class="text-gray-500">HTTPS</span>
+                </div>
+                <div class="flex justify-between items-center p-2 bg-gray-800/50 rounded">
+                    <span><strong>3306</strong></span>
+                    <span class="text-gray-500">MySQL</span>
+                </div>
+                <div class="flex justify-between items-center p-2 bg-gray-800/50 rounded">
+                    <span><strong>5432</strong></span>
+                    <span class="text-gray-500">PostgreSQL</span>
+                </div>
+                <div class="flex justify-between items-center p-2 bg-gray-800/50 rounded">
+                    <span><strong>3389</strong></span>
+                    <span class="text-gray-500">RDP</span>
+                </div>
             </div>
         </div>
-        
-        <!-- Common Ports Card -->
-        <div class="card mt-4">
-            <div class="card-header">
-                <i class="fas fa-book"></i> Common Ports
-            </div>
-            <div class="card-body">
-                <ul class="list-unstyled small">
-                    <li><strong>21</strong> - FTP</li>
-                    <li><strong>22</strong> - SSH</li>
-                    <li><strong>80</strong> - HTTP</li>
-                    <li><strong>443</strong> - HTTPS</li>
-                    <li><strong>3306</strong> - MySQL</li>
-                    <li><strong>5432</strong> - PostgreSQL</li>
-                    <li><strong>3389</strong> - RDP</li>
-                </ul>
-            </div>
-        </div>
-        
-        <!-- Legal Disclaimer Card -->
-        <div class="card mt-4 border-warning">
-            <div class="card-header bg-warning">
-                <i class="fas fa-exclamation-triangle"></i> Legal Notice
-            </div>
-            <div class="card-body">
-                <small>
-                    Unauthorized access to computer networks is <strong>ILLEGAL</strong>. 
-                    Only scan networks you own or have explicit written permission to test. 
-                    Misuse may result in legal consequences.
-                </small>
+
+        <!-- Statistics Card -->
+        <div class="glass rounded-2xl p-6 border border-gray-700 card-hover">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                <i class="fas fa-chart-bar text-green-400 text-2xl"></i>
+                Your Stats
+            </h3>
+            <div class="space-y-3 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Total Scans</span>
+                    <span class="font-bold text-purple-400">{{ scans_count|default:0 }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Open Ports Found</span>
+                    <span class="font-bold text-green-400">{{ open_ports|default:0 }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Last Scan</span>
+                    <span class="font-bold text-blue-400">{{ last_scan|default:"Never" }}</span>
+                </div>
             </div>
         </div>
     </div>

@@ -2,263 +2,90 @@
 
 {% block title %}Scan Results - TRINETRA{% endblock %}
 
-{% block extra_css %}
-<style>
-    .port-badge {
-        display: inline-block;
-        padding: 5px 10px;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        margin: 2px;
-    }
-    
-    .port-open {
-        background-color: #d5f4e6;
-        color: #27ae60;
-    }
-    
-    .port-closed {
-        background-color: #fadbd8;
-        color: #c0392b;
-    }
-    
-    .port-filtered {
-        background-color: #fef5e7;
-        color: #f39c12;
-    }
-    
-    .host-card {
-        border-left: 4px solid #3498db;
-    }
-    
-    .risk-critical {
-        background-color: #fadbd8;
-        border-left: 4px solid #c0392b;
-    }
-    
-    .risk-high {
-        background-color: #fef5e7;
-        border-left: 4px solid #f39c12;
-    }
-    
-    .risk-medium {
-        background-color: #e8f8f5;
-        border-left: 4px solid #f39c12;
-    }
-    
-    .pre-formatted {
-        background-color: #f5f5f5;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        padding: 15px;
-        overflow-x: auto;
-        font-family: 'Courier New', monospace;
-        font-size: 0.9rem;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="row">
-    <div class="col-lg-8">
-        <!-- Results Header -->
-        <h2>
-            <i class="fas fa-check-circle text-success"></i> Scan Results
-        </h2>
-        
-        {% if scan %}
-            <!-- Target & Summary -->
-            <div class="card mt-4">
-                <div class="card-header">
-                    <i class="fas fa-bullseye"></i> Scan Summary
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>Target:</strong> {{ scan.target }}</p>
-                            <p><strong>Port Range:</strong> {{ scan.port_range }}</p>
-                            <p><strong>Status:</strong> 
-                                <span class="badge {% if scan.status == 'completed' %}bg-success{% elif scan.status == 'failed' %}bg-danger{% else %}bg-warning{% endif %}">
-                                    {{ scan.get_status_display }}
-                                </span>
-                            </p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Scan Date:</strong> {{ scan.created_at|date:"Y-m-d H:i:s" }}</p>
-                            <p><strong>Duration:</strong> 
-                                {% if scan.scan_duration %}
-                                    {{ scan.scan_duration|floatformat:2 }} seconds
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </p>
-                            <p><strong>Risk Level:</strong> 
-                                <span class="badge 
-                                    {% if scan.risk_level == 'CRITICAL' %}bg-danger
-                                    {% elif scan.risk_level == 'HIGH' %}bg-warning text-dark
-                                    {% elif scan.risk_level == 'MEDIUM' %}bg-info
-                                    {% else %}bg-success{% endif %}">
-                                    {{ scan.risk_level }}
-                                </span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Port Statistics -->
-            <div class="card mt-4">
-                <div class="card-header">
-                    <i class="fas fa-chart-pie"></i> Port Statistics
-                </div>
-                <div class="card-body">
-                    <div class="row text-center">
-                        <div class="col-md-4">
-                            <div class="stat-box">
-                                <h3 class="text-success">{{ scan.open_ports_count }}</h3>
-                                <p class="text-muted">Open Ports</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="stat-box">
-                                <h3 class="text-danger">{{ scan.closed_ports_count }}</h3>
-                                <p class="text-muted">Closed Ports</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="stat-box">
-                                <h3 class="text-warning">{{ scan.filtered_ports_count }}</h3>
-                                <p class="text-muted">Filtered Ports</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Raw Results -->
-            <div class="card mt-4">
-                <div class="card-header">
-                    <i class="fas fa-terminal"></i> Detailed Scan Output
-                </div>
-                <div class="card-body">
-                    <div class="pre-formatted">
-                        {{ result|linebreaks }}
-                    </div>
-                </div>
-            </div>
-        {% else %}
-            <div class="alert alert-info mt-4">
-                <i class="fas fa-info-circle"></i> No scan results available.
-            </div>
-        {% endif %}
+<div class="space-y-6 animate-slide-in">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <h1 class="text-3xl font-bold">Scan Results</h1>
+        <a href="{% url 'history' %}" class="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 transition">
+            <i class="fas fa-arrow-left mr-2"></i>Back to History
+        </a>
     </div>
-    
-    <!-- Risk Analysis Sidebar -->
-    <div class="col-lg-4">
-        {% if risks %}
-            <!-- Critical Risks -->
-            {% if risks.critical %}
-                <div class="card card-danger mb-4">
-                    <div class="card-header bg-danger text-white">
-                        <i class="fas fa-exclamation-triangle"></i> Critical Risks
-                    </div>
-                    <div class="card-body">
-                        {% for risk in risks.critical %}
-                            <div class="risk-critical p-3 mb-3 rounded">
-                                <strong>Port {{ risk.port }}: {{ risk.service }}</strong>
-                                <p class="small mb-2">{{ risk.description }}</p>
-                                <p class="small text-muted mb-0">
-                                    <i class="fas fa-lightbulb"></i> {{ risk.recommendation }}
-                                </p>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            {% endif %}
-            
-            <!-- High Risks -->
-            {% if risks.high %}
-                <div class="card mb-4">
-                    <div class="card-header bg-warning text-dark">
-                        <i class="fas fa-exclamation-circle"></i> High Risks
-                    </div>
-                    <div class="card-body">
-                        {% for risk in risks.high %}
-                            <div class="risk-high p-3 mb-3 rounded">
-                                <strong>Port {{ risk.port }}: {{ risk.service }}</strong>
-                                <p class="small mb-2">{{ risk.description }}</p>
-                                <p class="small text-muted mb-0">
-                                    <i class="fas fa-lightbulb"></i> {{ risk.recommendation }}
-                                </p>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            {% endif %}
-            
-            <!-- Medium Risks -->
-            {% if risks.medium %}
-                <div class="card mb-4">
-                    <div class="card-header bg-info text-white">
-                        <i class="fas fa-info-circle"></i> Medium Risks
-                    </div>
-                    <div class="card-body">
-                        {% for risk in risks.medium %}
-                            <div class="risk-medium p-3 mb-3 rounded">
-                                <strong>Port {{ risk.port }}: {{ risk.service }}</strong>
-                                <p class="small mb-2">{{ risk.description }}</p>
-                                <p class="small text-muted mb-0">
-                                    <i class="fas fa-lightbulb"></i> {{ risk.recommendation }}
-                                </p>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            {% endif %}
-            
-            <!-- No Risks -->
-            {% if not risks.critical and not risks.high and not risks.medium %}
-                <div class="alert alert-success">
-                    <i class="fas fa-check-circle"></i> No significant security risks detected!
-                </div>
-            {% endif %}
-        {% else %}
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle"></i> Risk analysis pending...
+
+    <!-- Result Summary Card -->
+    <div class="glass rounded-2xl p-8 border border-gray-700 card-hover">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+            <!-- Target -->
+            <div class="text-center p-4 bg-gray-800/50 rounded-lg">
+                <p class="text-gray-400 text-sm">Target</p>
+                <p class="text-xl font-bold text-purple-400 mt-1">{{ result.target }}</p>
             </div>
-        {% endif %}
-        
-        <!-- Actions -->
-        <div class="card mt-4">
-            <div class="card-header">
-                <i class="fas fa-cogs"></i> Actions
+            
+            <!-- Open Ports -->
+            <div class="text-center p-4 bg-green-500/20 rounded-lg">
+                <p class="text-gray-400 text-sm">Open Ports</p>
+                <p class="text-xl font-bold text-green-400 mt-1">{{ result.open_ports_count }}</p>
             </div>
-            <div class="card-body">
-                <div class="d-grid gap-2">
-                    <a href="{% url 'scan' %}" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> New Scan
-                    </a>
-                    <a href="{% url 'history' %}" class="btn btn-secondary">
-                        <i class="fas fa-history"></i> View History
-                    </a>
-                </div>
+            
+            <!-- Closed Ports -->
+            <div class="text-center p-4 bg-red-500/20 rounded-lg">
+                <p class="text-gray-400 text-sm">Closed Ports</p>
+                <p class="text-xl font-bold text-red-400 mt-1">{{ result.closed_ports_count }}</p>
+            </div>
+            
+            <!-- Filtered Ports -->
+            <div class="text-center p-4 bg-yellow-500/20 rounded-lg">
+                <p class="text-gray-400 text-sm">Filtered Ports</p>
+                <p class="text-xl font-bold text-yellow-400 mt-1">{{ result.filtered_ports_count }}</p>
+            </div>
+            
+            <!-- Risk Level -->
+            <div class="text-center p-4 bg-blue-500/20 rounded-lg">
+                <p class="text-gray-400 text-sm">Risk Level</p>
+                <p class="text-xl font-bold text-blue-400 mt-1">{{ result.risk_level }}</p>
             </div>
         </div>
-        
-        <!-- Security Tips -->
-        <div class="card mt-4">
-            <div class="card-header">
-                <i class="fas fa-shield-alt"></i> Security Tips
+
+        <!-- Status and Time Info -->
+        <div class="flex flex-wrap gap-4 text-sm text-gray-400">
+            <div>
+                <i class="fas fa-info-circle mr-2 text-purple-400"></i>
+                <strong>Status:</strong> 
+                <span class="badge bg-green-500/20 text-green-400 px-2 py-1 rounded">{{ result.get_status_display }}</span>
             </div>
-            <div class="card-body">
-                <ul class="list-unstyled small">
-                    <li><i class="fas fa-check text-success"></i> Close unnecessary open ports</li>
-                    <li><i class="fas fa-check text-success"></i> Use firewalls to restrict access</li>
-                    <li><i class="fas fa-check text-success"></i> Keep services updated</li>
-                    <li><i class="fas fa-check text-success"></i> Use strong authentication</li>
-                </ul>
+            <div>
+                <i class="fas fa-clock mr-2 text-purple-400"></i>
+                <strong>Scanned:</strong> {{ result.created_at|date:"Y-m-d H:i:s" }}
             </div>
+            <div>
+                <i class="fas fa-hourglass-end mr-2 text-purple-400"></i>
+                <strong>Duration:</strong> {{ result.scan_duration }} seconds
+            </div>
+        </div>
+    </div>
+
+    <!-- Scan Output -->
+    <div class="glass rounded-2xl p-8 border border-gray-700">
+        <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+            <i class="fas fa-terminal text-green-400"></i>Scan Output
+        </h2>
+        <div class="bg-gray-950 rounded-lg p-4 overflow-x-auto border border-gray-800">
+            <pre class="text-green-400 font-mono text-sm whitespace-pre-wrap break-words">{{ result.result }}</pre>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="glass rounded-2xl p-6 border border-gray-700">
+        <div class="flex gap-4">
+            <a href="{% url 'scan' %}" class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition flex items-center gap-2">
+                <i class="fas fa-plus"></i>New Scan
+            </a>
+            <form method="POST" action="{% url 'delete_scan' result.id %}" onsubmit="return confirm('Delete this scan?');" class="inline">
+                {% csrf_token %}
+                <button type="submit" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center gap-2">
+                    <i class="fas fa-trash"></i>Delete Scan
+                </button>
+            </form>
         </div>
     </div>
 </div>
